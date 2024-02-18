@@ -1,0 +1,31 @@
+accounts:
+  "123456789012":
+    "regions":
+      "eu-west-1":
+        "services":
+          - "foo"
+          - "bar"
+      "us-east-1":
+        "services":
+          - "*"
+  "023456789013":
+    "regions":
+      "eu-west-1":
+        "services":
+          - "*"
+  "222222222222":
+    "regions":
+      "*":
+        "services":
+          - "ec2"
+          - "s3"
+  "111111111111":
+    "regions":
+      "*":
+        "services":
+          - "*"
+  "581039954779":
+    "regions":
+      "*":
+        "services":
+          - "s3"
