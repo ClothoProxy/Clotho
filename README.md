@@ -14,7 +14,7 @@ Wildcards are supported using "*".
 
 The current implementation derives the AWS Account ID offline using the technique described in [a short note on AWS KEY ID by Tal Be'ery](https://medium.com/@TalBeerySec/a-short-note-on-aws-key-id-f88cc4317489). Currently doesn't work with keys issued before ~2019, but maybe that's a good thing.
 
-You can find docs at [docs.rs](https://docs.rs/Clotho/latest)
+You can find docs at [docs.rs](https://docs.rs/clotho/0.1.0/clotho/)
 
 ## What's included
 

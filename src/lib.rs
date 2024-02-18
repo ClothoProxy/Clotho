@@ -10,7 +10,7 @@
 //! This crate provides a library and binaries for identitying the origin of an AWS `Sigv4` request.
 //! The only documented way to achieve this is by calling the STS endpoint
 //! <https://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html> . However, it
-//! turns out the AWS account ID is encoded in the AWS Access Key Id, as discovered by <?> .  
+//! turns out the AWS account ID is encoded in the AWS Access Key Id, as discovered by[a short note on AWS KEY ID by Tal Be'ery](https://medium.com/@TalBeerySec/a-short-note-on-aws-key-id-f88cc4317489). .  
 //! Instead of making an HTTP request for each authorization request, we can "extract" the AWS
 //! accound ID offline.
 //!
