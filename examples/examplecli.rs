@@ -1,16 +1,11 @@
 use clotho::AWSCredential;
-//use std::env;
 use std::path::PathBuf;
 
 use clap::Parser;
 
-// proxy --credential AKIAlaksjdlaksjd --csv account.csv
-// proxy --credential AKIAlaksjdlaksjd --account_id 91829812891
-// awsauthz --config /etc/config --debug
-
 /// Parse and validate a `Sigv4` signature based on a config
 #[derive(Parser, Debug)]
-#[command(author="costaskou", version, about="A sigv4 command line", long_about = None)]
+#[command(author="costasko", version, about="A clotho command line example", long_about = None)]
 struct CliArgs {
     /// Config file location
     #[clap(short, long)]

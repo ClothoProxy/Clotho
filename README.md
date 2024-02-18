@@ -14,11 +14,23 @@ Wildcards are supported using "*".
 
 The current implementation derives the AWS Account ID offline using the technique described in [a short note on AWS KEY ID by Tal Be'ery](https://medium.com/@TalBeerySec/a-short-note-on-aws-key-id-f88cc4317489). Currently doesn't work with keys issued before ~2019, but maybe that's a good thing.
 
+You can find docs at [docs.rs](https://docs.rs/Clotho/latest)
 
 ## What's included
 
-The library is published as a crate and should be able to cross build it targeting aarch64 using cross and
-`cross build --target aarch64-unknown-linux-gnu --bin squid-icap`
+The library is published as a crate and should be able to cross build it targeting aarch64 using cross.
+
+
+Run the example
+`cargo run  --example examplecli -- --config examples/config.yaml.example --credential AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request`
+
+The binary folder contains
+- A simple binary for use with squid [squid.rs](./src/bin/squid.rs)
+- A very basic ICAP server - also for use with squid - [squid-icap.rs](./src/bin/squid-icap.rs)
+
+You should be able to target other architectures with `cross`, e.g.
+`cross build --target aarch64-unknown-linux-gnu --bin ...`
+
 
 
 ## Cost Savings
@@ -53,7 +65,7 @@ A t4g instance would cater for up to 5 Gbit/s, and a c7gn.2xlarge up to 50Gbit/s
 It doesn't support API access, only console access.
 
 ### Roadmap
-- [ ] Potentially fallback to calling sts get-caller-identity
+- [ ] Potentially fallback to calling `sts get-caller-identity`
 - [ ] Add capabilities for web console access filtering
 - [ ] Add examples/binaries for more proxies, e.g. Envoy
 - [ ] Convert this list to issues
