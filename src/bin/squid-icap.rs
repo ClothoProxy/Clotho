@@ -6,6 +6,7 @@ use icaparse::{Request as ICAPRequest, EMPTY_HEADER as ICAP_EMPTY_HEADER};
 use std::path::PathBuf;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
+use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 const OPTIONS: &[u8] = r#"ICAP/1.0 200 OK
 Methods: REQMOD
@@ -34,6 +35,10 @@ const ALLOW: &[u8] = r#"ICAP/1.0 204 No Content
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let listener = TcpListener::bind("127.0.0.1:1344").await?;
+    let subscriber = FmtSubscriber::builder()
+        .with_env_filter(EnvFilter::new("debug"))
+        .finish();
+    tracing::subscriber::set_global_default(subscriber).expect("failed setting tracing");
 
     loop {
         let (mut socket, _) = listener.accept().await?;

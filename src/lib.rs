@@ -18,7 +18,7 @@
 //! requests are critical.
 //!
 //!
-use chrono::NaiveDate;
+use chrono::{NaiveDate, Utc};
 use data_encoding::BASE32;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -26,6 +26,7 @@ use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 use thiserror::Error;
+use tracing::{debug, error, warn};
 
 /// YAML container struct
 #[derive(Debug, Deserialize, Eq, PartialEq)]
@@ -61,7 +62,7 @@ pub struct AWSCredential {
 
 impl AWSCredential {
     const BYTE_MASK: u64 = 0x7fff_ffff_ff80;
-    const ANY: &str = "*";
+    const ANY: &'static str = "*";
 
     /// Return the information held in AWS `Sigv4` from the `Authorization` header
     /// Use this function to pass the whole `Authorization` header
@@ -81,16 +82,17 @@ impl AWSCredential {
     /// - `AWSCredentialError::CredentialComponentMissingParts` - if the auth header is not complete
     /// - `AWSCredentialError::DateParseError` - if the date cannot be parsed
     ///
+    #[tracing::instrument]
     pub fn new_from_http_authz(header: &str) -> Result<AWSCredential, AWSCredentialError> {
         let start = header
             .find("Credential=")
             .ok_or_else(|| AWSCredentialError::AuthHeaderMissingParts(header.to_string()))?;
-
         let value_start = start + 11; //"Credential=".len();
 
         let end = header[value_start..].find(',').unwrap_or(header.len());
 
         let header = Ok(&header[value_start..value_start + end])?;
+        debug!(header = header);
         Ok(AWSCredential::new(header))?
     }
 
@@ -125,14 +127,20 @@ impl AWSCredential {
         let parts: Vec<&str> = credential.split('/').collect();
 
         if parts.len() != 5 {
+            error!(error = %AWSCredentialError::CredentialComponentMissingParts(credential.to_string()));
             return Err(AWSCredentialError::CredentialComponentMissingParts(
                 credential.to_string(),
             ));
         }
-
         let account_id = AWSCredential::get_account_id(parts[0].as_bytes())?;
         let date = AWSCredential::parse_date(parts[1])?;
         let service = parts[3].to_string();
+
+        debug!(
+            credential = credential,
+            access_key_id = parts[0].to_string(),
+            status = "Parsed"
+        );
 
         Ok(AWSCredential {
             access_key_id: parts[0].to_string(),
@@ -154,6 +162,12 @@ impl AWSCredential {
             .get(&self.account_id)
             .or_else(|| config.accounts.get(Self::ANY))
         else {
+            debug!(
+                access_key_id = self.access_key_id,
+                region = self.region,
+                service = self.service,
+                status = "Denied"
+            );
             return false;
         };
 
@@ -162,14 +176,32 @@ impl AWSCredential {
             .get(&self.region)
             .or_else(|| account.regions.get(Self::ANY))
         else {
+            debug!(
+                access_key_id = self.access_key_id,
+                region = self.region,
+                service = self.service,
+                status = "Denied"
+            );
             return false;
         };
 
         if services.services.contains(&self.service)
             || services.services.contains(&Self::ANY.to_owned())
         {
+            debug!(
+                access_key_id = self.access_key_id,
+                region = self.region,
+                service = self.service,
+                status = "Allowed"
+            );
             return true;
         }
+        debug!(
+            access_key_id = self.access_key_id,
+            region = self.region,
+            service = self.service,
+            status = "Denied"
+        );
 
         false
     }
@@ -180,7 +212,10 @@ impl AWSCredential {
     fn parse_date(date_str: &str) -> Result<NaiveDate, AWSCredentialError> {
         match NaiveDate::parse_from_str(date_str, "%Y%m%d") {
             Ok(date) => Ok(date),
-            Err(e) => Err(AWSCredentialError::DateParseError(e.to_string())),
+            Err(e) => {
+                error!(error = %AWSCredentialError::DateParseError(e.to_string()));
+                Err(AWSCredentialError::DateParseError(e.to_string()))
+            }
         }
     }
 
@@ -191,6 +226,7 @@ impl AWSCredential {
     /// an access key id is at least 12 digits long
     fn get_account_id(access_key_id: &[u8]) -> Result<String, AWSCredentialError> {
         if access_key_id.len() <= 12 {
+            error!(error = %AWSCredentialError::AccessKeyIDLengthError(access_key_id.len().to_string()));
             return Err(AWSCredentialError::AccessKeyIDLengthError(
                 access_key_id.len().to_string(),
             ));
@@ -199,13 +235,16 @@ impl AWSCredential {
         match BASE32.decode_len(key_part.len()) {
             Ok(decode_len) => {
                 if decode_len != 10 {
+                    error!(error = %AWSCredentialError::AccessKeyIDLengthError(decode_len.to_string()));
                     return Err(AWSCredentialError::AccountMissingFromAccessKeyId(
                         decode_len.to_string(),
                     ));
                 }
             }
-
-            Err(e) => return Err(AWSCredentialError::Base32DecodeError(e.to_string())),
+            Err(e) => {
+                error!(time = %Utc::now().to_rfc3339(), error = %AWSCredentialError::Base32DecodeError(e.to_string()));
+                return Err(AWSCredentialError::Base32DecodeError(e.to_string()));
+            }
         };
 
         let mut output: [u8; 10] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -216,6 +255,7 @@ impl AWSCredential {
         ]);
 
         let e = (decodedb & AWSCredential::BYTE_MASK) >> 7;
+        debug!(credentials = e);
         Ok(format!("{e:0>12}"))
     }
 
@@ -228,6 +268,7 @@ impl AWSCredential {
         let mut file = File::open(file_path)?;
         let mut contents = String::new();
         file.read_to_string(&mut contents)?;
+        debug!(status = "Config parsed.");
         Ok(serde_yaml::from_str(&contents)?)
     }
 }

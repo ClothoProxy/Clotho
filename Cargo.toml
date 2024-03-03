@@ -1,6 +1,6 @@
 [package]
 name = "clotho"
-version = "0.1.1-alpha"
+version = "0.1.1"
 edition = "2021"
 authors = ["Costas K"]
 description = "A minimal AWS sigv4 verification library"
@@ -9,14 +9,15 @@ homepage = "https://github.com/ClothoProxy/Clotho"
 license = "MIT"
 keywords = ["AWS", "proxy", "security"]
 
+
 [dependencies]
-chrono = "0.4.31"
+chrono = "0.4.34"
 clap = { version = "4.4.16", features = ["derive"] } 
-data-encoding = "2.4.0"
+data-encoding = "2.5.0"
 serde = { version = "1.0", features = ["derive"] }
-serde_yaml = "0.9.30"
-thiserror = "1.0.52"
-tracing = "0.1"
+serde_yaml = "0.9.32"
+thiserror = "1.0.57"
+tracing = "0.1.40"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tokio = { version = "1.35.1", features = ["full"]}
 httparse = "1.8.0"

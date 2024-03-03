@@ -1,8 +1,14 @@
 use clotho::AWSCredential;
 use std::path::PathBuf;
+use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 /// Parse and validate a SigV4 signature based on a config
 fn main() {
+    let subscriber = FmtSubscriber::builder()
+        .with_env_filter(EnvFilter::new("debug"))
+        .finish();
+    tracing::subscriber::set_global_default(subscriber).expect("failed setting tracing");
+
     let aws_cred =
         match AWSCredential::new("AKIAIOSFODNN7EXAMPLE/20130524/us-east-1/s3/aws4_request") {
             Ok(aws_cred) => aws_cred,
