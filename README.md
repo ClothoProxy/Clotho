@@ -18,7 +18,11 @@ You can find docs at [docs.rs](https://docs.rs/clotho/0.1.0/clotho/)
 
 ## What's included
 
-The library is published as a crate and should be able to cross build it targeting aarch64 using cross.
+See [integrations](https://github.com/ClothoProxy/integrations) for working examples.
+
+
+You can
+The library is published as a crate and should be able be cross build it targeting aarch64 using cross.
 
 
 Run the example
