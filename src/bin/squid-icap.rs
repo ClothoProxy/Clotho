@@ -1,11 +1,10 @@
-/// This implementation panics trivially by passing a null-body length that is larger than the
-/// actual request header. This behaviour stems from `icaparse`.
 use clotho::AWSCredential;
 use httparse::{Request as HTTPRequest, EMPTY_HEADER};
 use icaparse::{Request as ICAPRequest, EMPTY_HEADER as ICAP_EMPTY_HEADER};
 use std::path::PathBuf;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
+use tracing::error;
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 const OPTIONS: &[u8] = r#"ICAP/1.0 200 OK
@@ -45,7 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         tokio::spawn(async move {
             let mut buf = Vec::new();
-            let mut temp_buf = [0; 2048]; // Buffer for reading data in chunks
+            let mut temp_buf = [0; 1024]; // Buffer, we don't expect more than 1024 bytes
 
             loop {
                 match socket.read(&mut temp_buf).await {
@@ -65,12 +64,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         }
 
                         let Some(icap_encap) = icap_request.encapsulated_sections else {
-                            panic!("Expected encapsulated sections found none");
+                            error!("Expected encapsulated sections found none");
+                            let _ = socket.write_all(DENY).await;
+                            break;
                         };
                         let Some(icap_parsed_http) =
                             icap_encap.get(&icaparse::SectionType::RequestHeader)
                         else {
-                            panic!("Expected request headers inside the encapsulated sections");
+                            error!("Expected request headers inside the encapsulated sections");
+                            let _ = socket.write_all(DENY).await;
+                            break;
                         };
 
                         // We start parsing the HTTP Request
@@ -96,7 +99,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     match AWSCredential::new_from_http_authz(&authz_header) {
                                         Ok(aws_cred) => aws_cred,
                                         Err(e) => {
-                                            println!("{e:?}");
+                                            error!("{e:?}");
                                             break;
                                         }
                                     };
@@ -105,7 +108,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 let config = match aws_cred.read_config(file_path) {
                                     Ok(config) => config,
                                     Err(e) => {
-                                        println!("Error {e:?}");
+                                        error!("Error {e:?}");
                                         let _ = socket.write_all(DENY).await;
                                         break;
                                     }
@@ -121,18 +124,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             }
 
                             Ok(httparse::Status::Partial) => {
-                                println!("We don't deal with partial HTTP requests");
+                                error!("We don't deal with partial HTTP requests");
+                                let _ = socket.write_all(DENY).await;
+                                break;
                             }
-                            Err(_) => {
-                                println!("Something went wrong parsing the encapsulated HTTP");
+                            Err(e) => {
+                                error!("Something went wrong parsing the encapsulated HTTP {e}");
+                                let _ = socket.write_all(DENY).await;
+                                break;
                             }
                         }
                     }
                     Ok(icaparse::Status::Partial) => {
-                        println!("We don't deal with partial ICAP requests");
+                        error!("We don't deal with partial ICAP requests");
+                        let _ = socket.write_all(DENY).await;
+                        break;
                     }
-                    Err(_) => {
-                        println!("Something went wrong when parsing the ICAP request");
+                    Err(e) => {
+                        error!("Something went wrong when parsing the ICAP request {e}");
+                        let _ = socket.write_all(DENY).await;
+                        break;
                     }
                 }
             }

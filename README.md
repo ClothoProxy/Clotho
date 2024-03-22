@@ -14,7 +14,7 @@ Wildcards are supported using "*".
 
 The current implementation derives the AWS Account ID offline using the technique described in [a short note on AWS KEY ID by Tal Be'ery](https://medium.com/@TalBeerySec/a-short-note-on-aws-key-id-f88cc4317489). Currently doesn't work with keys issued before ~2019, but maybe that's a good thing.
 
-You can find docs at [docs.rs](https://docs.rs/clotho/0.1.0/clotho/)
+You can find docs at [docs.rs](https://docs.rs/clotho/0.2.0/clotho/)
 
 ## What's included
 
@@ -47,7 +47,7 @@ A back-of-the-envelope calculation comparing VPC Endpoints and Clotho, with the 
 - There are no egress costs for reaching out to AWS Services in the same region - [Reference](https://aws.amazon.com/blogs/architecture/overview-of-data-transfer-costs-for-common-architectures/)
 - Clotho runs on graviton and the pricing is on-demand
 
-| Traffic | VPCE Count | VPCE Price | Clotho Price | Clotho instance type|
+| Traffic | VPCE Count | VPCE Price | Clotho Cost | Clotho instance type|
 | :-- | :-- |:--: | :--: | :-- |
 |  1 TB   | 10                 |  $226    | $9.072  | t4g x3 |
 | 1 TB    | 20                 |  $433   | $9.072 | t4g x3 |
@@ -71,5 +71,5 @@ It doesn't support API access, only console access.
 ### Roadmap
 - [ ] Potentially fallback to calling `sts get-caller-identity`
 - [ ] Add capabilities for web console access filtering
-- [ ] Add examples/binaries for more proxies, e.g. Envoy
+- [ ] Add examples/binaries for more proxies? - e.g. Envoy 
 - [ ] Convert this list to issues

@@ -298,6 +298,7 @@ pub enum AWSCredentialError {
 }
 
 /// Errors for loading the YAML config
+#[non_exhaustive]
 #[derive(Error, Debug)]
 pub enum ConfigError {
     /// IO Error when trying to read file
