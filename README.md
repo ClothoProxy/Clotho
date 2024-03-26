@@ -16,12 +16,13 @@ The current implementation derives the AWS Account ID offline using the techniqu
 
 You can find docs at [docs.rs](https://docs.rs/clotho/0.2.0/clotho/)
 
+For more in-depth info on the why see [https://me.costaskou.com/articles/cross-account-access-in-public-cloud/](https://me.costaskou.com/articles/cross-account-access-in-public-cloud/)
+
 ## What's included
 
 See [integrations](https://github.com/ClothoProxy/integrations) for working examples.
 
 
-You can
 The library is published as a crate and should be able be cross build it targeting aarch64 using cross.
 
 
@@ -31,6 +32,8 @@ Run the example
 The binary folder contains
 - A simple binary for use with squid [squid.rs](./src/bin/squid.rs)
 - A very basic ICAP server - also for use with squid - [squid-icap.rs](./src/bin/squid-icap.rs)
+- An example standalone intercepting proxy using [https://github.com/omjadas/hudsucker](https://github.com/omjadas/hudsucker) - [standalonehud.rs](./src/bin/standalonehud.rs)
+
 
 You should be able to target other architectures with `cross`, e.g.
 `cross build --target aarch64-unknown-linux-gnu --bin ...`
@@ -67,9 +70,3 @@ A t4g instance would cater for up to 5 Gbit/s, and a c7gn.2xlarge up to 50Gbit/s
 - Why not [AWS Management Console Private Access](https://docs.aws.amazon.com/awsconsolehelpdocs/latest/gsg/console-private-access.html) ?
 
 It doesn't support API access, only console access.
-
-### Roadmap
-- [ ] Potentially fallback to calling `sts get-caller-identity`
-- [ ] Add capabilities for web console access filtering
-- [ ] Add examples/binaries for more proxies? - e.g. Envoy 
-- [ ] Convert this list to issues
