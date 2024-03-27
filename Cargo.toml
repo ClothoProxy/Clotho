@@ -24,7 +24,6 @@ httparse = "1.8.0"
 icaparse = "0.2.0"
 hudsucker = "0.21.0"
 rustls-pemfile = "2.1.1"
-async-trait = "0.1.79"
 
 [dev-dependencies]
 cargo-llvm-cov = "0.5.39"
