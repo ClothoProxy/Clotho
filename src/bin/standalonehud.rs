@@ -1,20 +1,15 @@
-//use async_trait::async_trait;
-
 use hudsucker::{
     certificate_authority::RcgenAuthority,
     hyper::{Body, Method, Request, Response, StatusCode},
-    rustls,
-    //rustls::Certificate,
-    HttpContext,
-    HttpHandler,
-    Proxy,
-    RequestOrResponse,
+    rustls, HttpContext, HttpHandler, Proxy, RequestOrResponse,
 };
 
 use clotho::AWSCredential;
 use rustls_pemfile as pemfile;
 use std::net::SocketAddr;
 use std::path::PathBuf;
+use tracing::error;
+use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 async fn shutdown_signal() {
     tokio::signal::ctrl_c()
@@ -32,7 +27,7 @@ fn build_forbidden<'a>(msg: String) -> Response<Body> {
         .expect("Failed to create response");
 }
 
-#[async_trait::async_trait]
+#[hudsucker::async_trait::async_trait]
 impl HttpHandler for ClothoHandler {
     async fn handle_request(
         &mut self,
@@ -85,7 +80,10 @@ impl HttpHandler for ClothoHandler {
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt::init();
+    let subscriber = FmtSubscriber::builder()
+        .with_env_filter(EnvFilter::new("debug"))
+        .finish();
+    tracing::subscriber::set_global_default(subscriber).expect("failed setting tracing");
 
     let mut private_key_bytes: &[u8] = include_bytes!("ca/hudsucker.key");
     let mut ca_cert_bytes: &[u8] = include_bytes!("ca/hudsucker.cer");
