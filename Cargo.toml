@@ -1,6 +1,6 @@
 [package]
 name = "clotho"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 authors = ["Costas K"]
 description = "A minimal AWS sigv4 verification library"
@@ -9,6 +9,18 @@ homepage = "https://github.com/ClothoProxy/Clotho"
 license = "MIT"
 keywords = ["AWS", "proxy", "security"]
 
+
+[lib]
+name = "clotho"
+path = "src/lib.rs"
+
+[[bin]]
+name = "clothohud"
+path = "src/bin/clothohud.rs"
+
+[[bin]]
+name = "squid-icap"
+path = "src/bin/squid-icap.rs"
 
 [dependencies]
 chrono = "0.4.34"
