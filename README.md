@@ -1,15 +1,21 @@
 # Clotho
 
 A minimal AWS sigv4 verification library that can be used as an external authoriser with your favourite proxy.
-Clotho aims to be fast and secure.
 
-Why do you need Clotho ?
-
-1. Security. It's a way of enforcing AWS account,region or service access to public endpoints that don't support VPC endpoints or for resources that don't support policies. Other solutions don't support the AWS API.
-2. Cost. You don't have to pay for AWS Private Endpoints - if you only care for cross account attacks. You can use a proxy of your choosing and authorise requests.
+Clotho aims to be fast and secure. It's primary purpose is to act as an intercepting proxy that can forward AWS API requests only to: 
+1. Allowed AWS Accounts
+2. Allowed AWS regions
+3. Allowed AWS services
 
 Clotho expects a [config.yaml](./examples/config.yaml.example) file as an allowlist for allowed accounts, regions, and services.
 Wildcards are supported using "*".
+
+You can look at [integrations](https://github.com/ClothoProxy/integrations) to see example integrations with Squid and as a standalone proxy.
+
+## Why do you need Clotho ?
+
+1. Security. It's a way of enforcing AWS account,region or service access to public endpoints that don't support VPC endpoints or for resources that don't support policies. Other solutions don't support the AWS API.
+2. Cost. You don't have to pay for AWS Private Endpoints - if you only care for cross account attacks. You can use a proxy of your choosing and authorise requests.
 
 
 The current implementation derives the AWS Account ID offline using the technique described in [a short note on AWS KEY ID by Tal Be'ery](https://medium.com/@TalBeerySec/a-short-note-on-aws-key-id-f88cc4317489). Currently doesn't work with keys issued before ~2019, but maybe that's a good thing.
@@ -67,3 +73,8 @@ A t4g instance would cater for up to 5 Gbit/s, and a c7gn.2xlarge up to 50Gbit/s
 - Why not [AWS Management Console Private Access](https://docs.aws.amazon.com/awsconsolehelpdocs/latest/gsg/console-private-access.html) ?
 
 It doesn't support API access, only console access.
+
+- Is this production ready ?
+
+With your help it will be.
+
