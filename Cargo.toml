@@ -5,7 +5,7 @@ edition = "2021"
 authors = ["Costas K"]
 description = "A minimal AWS sigv4 verification library"
 readme = "README.md"
-homepage = "https://github.com/ClothoProxy/Clotho"
+repository = "https://github.com/ClothoProxy/Clotho"
 license = "MIT"
 keywords = ["AWS", "proxy", "security"]
 
